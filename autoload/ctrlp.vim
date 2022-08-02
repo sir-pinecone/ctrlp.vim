@@ -1270,7 +1270,6 @@ fu! ctrlp#acceptfile(...)
 		cal call('s:openfile', args)
 		let &swb = swb
 	en
-  if &cmdheight != 0 | set cmdheight=0 |en
 endf
 
 fu! s:SpecInputs(str)
