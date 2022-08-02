@@ -330,6 +330,7 @@ fu! s:Open()
 endf
 
 fu! s:Close()
+  if &cmdheight != 0 | set cmdheight=0 |en
 	cal s:async_glob_abort(0)
 	cal s:buffunc(0)
 	if winnr('$') == 1
@@ -1269,6 +1270,7 @@ fu! ctrlp#acceptfile(...)
 		cal call('s:openfile', args)
 		let &swb = swb
 	en
+  if &cmdheight != 0 | set cmdheight=0 |en
 endf
 
 fu! s:SpecInputs(str)
@@ -2845,6 +2847,8 @@ fu! ctrlp#init(type, ...)
 	if shouldExitSingle && s:ExitIfSingleCandidate()
 		retu 0
 	en
+
+  if &cmdheight == 0 | set cmdheight=1 | en
 	cal s:BuildPrompt(1)
 	if s:keyloop | cal s:KeyLoop() | en
 	retu 1
