@@ -330,7 +330,7 @@ fu! s:Open()
 endf
 
 fu! s:Close()
-	if has('patch-9.0.0115') && &cmdheight != 0 | set cmdheight=0 |en
+	if has('patch-9.0.0115') && &cmdheight != 0 | set cmdheight=0 | en
 	cal s:async_glob_abort(0)
 	cal s:buffunc(0)
 	if winnr('$') == 1
