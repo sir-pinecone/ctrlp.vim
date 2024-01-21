@@ -20,6 +20,7 @@ cal add(g:ctrlp_ext_vars, {
 	\ })
 
 let s:id = g:ctrlp_builtins + len(g:ctrlp_ext_vars)
+
 " Utilities {{{1
 fu! s:findcount(str, tgaddr)
 	let [tg, ofname] = split(a:str, '\t\+\ze[^\t]\+$')
@@ -83,15 +84,66 @@ fu! s:syntax()
 		sy match CtrlPTabExtra '\zs\t.*\ze$'
 	en
 endf
+
 " Public {{{1
 fu! ctrlp#tag#init()
 	if empty(s:tagfiles) | retu [] | en
 	let g:ctrlp_alltags = []
+
+    " @campo Filter out duplicate tags, which I get when searching multiple
+    " tag files, i.e. jai root tags + project tags.
+    " I wrote four different approaches and they're all slow. None really
+    " stand out so I'll just pick one for now and can tweak later if need be.
+
+    " Dedupe method 1 and 2
+    "let seen = {}
+
 	let tagfiles = sort(filter(s:tagfiles, 'count(s:tagfiles, v:val) == 1'))
 	for each in tagfiles
 		let alltags = s:filter(ctrlp#utils#readfile(each))
+
+        " Dedupe method 1
+        "let deduped = filter(alltags, '!has_key(seen, v:val)')
+        "for tag in deduped
+        "    let seen[tag] = 1
+        "endfor
+		"cal extend(g:ctrlp_alltags, deduped)
+
+        " Dedupe method 2
+        "let filtered_tags = []
+        "for tag in alltags
+        "    if !has_key(seen, tag)
+        "        call add(filtered_tags, tag)
+        "        let seen[tag] = 1
+        "    endif
+        "endfor
+		"cal extend(g:ctrlp_alltags, filtered_tags)
+
+        " Dedupe method 3 and 4
 		cal extend(g:ctrlp_alltags, alltags)
 	endfo
+
+    " Dedupe method 3
+    "fu! RemoveDuplicateTags(alltags)
+    "    let seen = {}
+    "    let unique_list = []
+    "    for tag in a:alltags
+    "        if !has_key(seen, tag)
+    "            call add(unique_list, tag)
+    "            let seen[tag] = 1
+    "        endif
+    "    endfor
+    "    return unique_list
+    "endfu
+    "let g:ctrlp_alltags = RemoveDuplicateTags(g:ctrlp_alltags)
+
+    " Dedupe method 4
+    fu! CompareByValue(tag1, tag2)
+        return a:tag1 == a:tag2 ? 0 : -1
+    endfu
+    call sort(g:ctrlp_alltags)
+    call uniq(g:ctrlp_alltags, 'CompareByValue')
+
 	cal s:syntax()
 	retu g:ctrlp_alltags
 endf
@@ -147,4 +199,3 @@ fu! ctrlp#tag#enter()
 endf
 "}}}
 
-" vim:fen:fdm=marker:fmr={{{,}}}:fdl=0:fdc=1:ts=2:sw=2:sts=2
